@@ -105,7 +105,7 @@ analytics:
 # Site Author
 author:
   name             : "min"
-  avatar           : "/assets/images/avatar.svg"
+  avatar           : "/assets/images/avatar.png"
   bio              : "시간날때 끄적이는 **꾸준한** 기술 정리 "
   location         : "Somewhere"
   email            :
