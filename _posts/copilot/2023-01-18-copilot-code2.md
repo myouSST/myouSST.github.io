@@ -59,7 +59,7 @@ public class UserQueryService {
 
 ```
 ---
-gpt - 100% 메서드,  100% 라인, 2/1 성공
+gpt - 100% 메서드,  100% 라인
 ``` java
 @ExtendWith(MockitoExtension.class)
 class UserQueryServiceTest {
@@ -112,7 +112,7 @@ class UserQueryServiceTest {
 }
 ```
 ---
-jetbrain ai assistant - 100% 메서드, 100% 라인, 3/3 성공
+jetbrain ai assistant - 100% 메서드, 100% 라인
 ```java
 @ExtendWith(MockitoExtension.class)
 class UserQueryServiceTest {
@@ -178,4 +178,47 @@ class UserQueryServiceTest {
 ---
 git hub copilot intelliJ 에서 테스트 케이스 생성 포기.. intelliJ 와의 호환성이 너무 낮다..
 
+---
+codeium - 100% 메서드, 100% 라인
+```java
+@ExtendWith(MockitoExtension.class)
+class UserQueryServiceTest {
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private TeamService teamService;
+
+    @InjectMocks
+    private UserQueryService userQueryService;
+
+    @Test
+    public void testFind() {
+        // Mocking userService and teamService to return expected values
+        User expectedUser = new User("userId", "userName", "", IdList.empty(), IdList.of("a-team", "c-team"));
+        when(userService.find("userId")).thenReturn(expectedUser);
+        when(teamService.find("a-team")).thenReturn(Team.sample());
+        when(teamService.find("c-team")).thenReturn(Team.sample1());
+
+        UserRdo result = userQueryService.find("userId");
+
+        assertEquals("userId", result.getId());
+    }
+
+    @Test
+    public void testFindAll() {
+        // Mocking userService and teamService to return expected values
+        User expectedUser = new User("userId", "userName", "", IdList.empty(), IdList.of( "c-team"));
+        User expectedUser2 = new User("userId2", "userName", "", IdList.empty(), IdList.of("a-team"));
+        List<User> expectedUsers = Arrays.asList(expectedUser, expectedUser2);
+        when(userService.findAll()).thenReturn(expectedUsers);
+        when(teamService.findAll()).thenReturn(Arrays.asList(Team.sample(), Team.sample1()));
+
+        List<UserRdo> result = userQueryService.findAll();
+
+        assertEquals(2, result.size());
+    }
+}
+```
 
