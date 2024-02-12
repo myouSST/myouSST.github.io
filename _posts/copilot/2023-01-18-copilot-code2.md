@@ -59,7 +59,7 @@ public class UserQueryService {
 
 ```
 ---
-gpt - 100% 메서드,  100% 라인
+## gpt - 100% 메서드,  100% 라인
 ``` java
 @ExtendWith(MockitoExtension.class)
 class UserQueryServiceTest {
@@ -112,7 +112,7 @@ class UserQueryServiceTest {
 }
 ```
 ---
-jetbrain ai assistant - 100% 메서드, 100% 라인
+## jetbrain ai assistant - 100% 메서드, 100% 라인
 ```java
 @ExtendWith(MockitoExtension.class)
 class UserQueryServiceTest {
@@ -176,10 +176,11 @@ class UserQueryServiceTest {
 
 ```
 ---
-git hub copilot intelliJ 에서 테스트 케이스 생성 포기.. intelliJ 와의 호환성이 너무 낮다..
+## github copilot 
+intelliJ 에서 테스트 케이스 생성 포기.. intelliJ 와의 호환성이 너무 낮다..
 
 ---
-codeium - 100% 메서드, 100% 라인
+## codeium - 100% 메서드, 100% 라인
 ```java
 @ExtendWith(MockitoExtension.class)
 class UserQueryServiceTest {
@@ -218,6 +219,52 @@ class UserQueryServiceTest {
         List<UserRdo> result = userQueryService.findAll();
 
         assertEquals(2, result.size());
+    }
+}
+```
+---
+## myou - 100% 메서드, 100% 라인
+```java
+@ExtendWith(MockitoExtension.class)
+class UserQueryServiceTest {
+    @InjectMocks
+    private UserQueryService userQueryService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private TeamService teamService;
+
+    @Test
+    void find() {
+        when(userService.find("myou"))
+            .thenReturn(User.sample());
+        when(teamService.find("c-team"))
+            .thenReturn(Team.sample());
+
+        UserRdo userRdo = userQueryService.find("myou");
+
+        assertEquals("myou", userRdo.getId());
+    }
+
+    @Test
+    void findAll() {
+        when(userService.findAll())
+            .thenReturn(Arrays.asList(User.sample(), User.sample2()));
+        when(teamService.findAll())
+            .thenReturn(getTeamSamples());
+
+        assertEquals(2, userQueryService.findAll().size());
+    }
+
+    private static List<Team> getTeamSamples() {
+        return Arrays.asList(
+            new Team("c-team", "C팀", ""),
+            new Team("t1", "팀1", ""),
+            new Team("t2", "팀2", ""),
+            new Team("t3", "팀3", "")
+        );
     }
 }
 ```
