@@ -25,7 +25,7 @@ categories: copilot
 ![자동 완성이 끊임없이 추천되는 모습](../../assets/images/copilot/github/github-auto.png)
 
 
-### 다만 chat 기능은 beta 버전으로 waitlist 대기 후 사용 가능하다.  
+### chat 기능은 beta 버전으로 waitlist 대기 후 사용 가능하다.  
 약 2주 정도 기다렸으며, 개인별로 편차가 좀 있는 듯하다.
 ![제약사항!](../../assets/images/copilot/github/github-impo.png)
 
