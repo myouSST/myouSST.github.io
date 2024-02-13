@@ -4,13 +4,7 @@ date: 2023-01-18 18:10:00 -0400
 categories: copilot
 ---
 
-## Level3 - Controller (restdoc)
-
-제가 관리하고 있는 제품은 REST API 를 지향하며 문서화는 restdocs 를 통해 진행중입니다.
-
-restdocs 는 테스트 코드처럼 관리가 가능하며 여기서 Controller 에서 제공하는 API spec 에 대한 명세를 합니다.
-
-기대는 API 에 노출되는 파라미터명을 보고 추론을 통해 restdocs 를 유의미하게 작성을 해주는가 입니다.
+## Level3 - remove 케이스 커버 테스트
 
 
 ---
