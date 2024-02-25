@@ -3,7 +3,13 @@
 public class GroupTalkServiceImplTest {
 
     @Mock
+    private TicketAdapter ticketAdapter;
+
+    @Mock
     private TicketQueryAdapter ticketQueryAdapter;
+
+    @Mock
+    private TicketCustomMetadataAdapter ticketCustomMetadataAdapter;
 
     @Mock
     private GroupTalkMemberService groupTalkMemberService;
@@ -11,88 +17,92 @@ public class GroupTalkServiceImplTest {
     @Mock
     private GroupTalkPartnerService groupTalkPartnerService;
 
+    @Mock
+    private TalkQueryAuthorizedFilterService talkQueryAuthorizedFilterService;
+
+    @Mock
+    private TalkCustomerQueryAuthorizedFilterService talkCustomerQueryAuthorizedFilterService;
+
     @InjectMocks
     private GroupTalkServiceImpl groupTalkService;
 
-
     @Test
-    public void testFindAll() {
-        // Create test data
-        GroupTalkQuery query = new GroupTalkQuery();
-        TicketRdoListRdo listRdo = new TicketRdoListRdo();
-        when(ticketQueryAdapter.findAll(any(), any(), any(), any())).thenReturn(listRdo);
+    void findAll() {
+        TicketRdoListRdo ticketRdoListRdo = TicketRdoListRdo.sample();
+        when(ticketQueryAdapter.findAll(any(TenantKey.class), any(TicketQuery.class), any(Pageable.class), any(Order.class)))
+            .thenReturn(ticketRdoListRdo);
 
-        // Call the method
-        GroupTalkListItemList result = groupTalkService.findAll(query);
+        GroupTalkQuery groupTalkQuery = GroupTalkQuery.builder()
+            .tenantKey(TenantKey.sample())
+            .ticketQuery(TicketQuery.sample())
+            .pageable(Pageable.all())
+            .order(Order.CREATED)
+            .build();
 
-        // Assertions
-        assertNotNull(result);
-        // Add more assertions as needed
+        GroupTalkListItemList actual = groupTalkService.findAll(groupTalkQuery);
+
+        GroupTalkListItemList expected = new GroupTalkListItemList(
+            ticketRdoListRdo.getList().stream()
+                .map(GroupTalkUtil::newTalk)
+                .map(GroupTalkListItem::new)
+                .collect(Collectors.toList()),
+            -1,
+            TicketRdoListRdo.sample().getTotal()
+        );
+
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void testFind() {
-        // Create test data
-        TicketKey ticketKey = new TicketKey();
-        TicketRdo ticketRdo = new TicketRdo();
-        when(ticketQueryAdapter.find(any())).thenReturn(ticketRdo);
+    void find() {
+        TicketRdo ticketRdo = TicketRdo.sample();
+        MemberList memberList = MemberList.sample();
+        PartnerList partnerList = PartnerList.sample();
 
-        // Call the method
-        GroupTalk result = groupTalkService.find(ticketKey);
+        when(ticketQueryAdapter.find(any(TicketKey.class)))
+            .thenReturn(ticketRdo);
+        when(groupTalkMemberService.findAll(any(TicketKey.class)))
+            .thenReturn(memberList);
+        when(groupTalkPartnerService.findAll(any(TicketKey.class)))
+            .thenReturn(partnerList);
 
-        // Assertions
-        assertNotNull(result);
-        // Add more assertions as needed
+
+        GroupTalk actual = groupTalkService.find(TicketKey.sample());
+
+        GroupTalk expected = new GroupTalk(GroupTalkUtil.newTalk(ticketRdo), memberList, partnerList, GroupTalkUtil.newGroupTalkOption(ticketRdo));
+
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void testFindForUpdate() {
-        // Create test data
-        TicketKey ticketKey = new TicketKey();
-        TicketRdo ticketRdo = new TicketRdo();
-        when(ticketQueryAdapter.findForUpdate(any())).thenReturn(ticketRdo);
+    void findForUpdate() {
+        TicketRdo ticketRdo = TicketRdo.sample();
+        MemberList memberList = MemberList.sample();
+        PartnerList partnerList = PartnerList.sample();
 
-        // Call the method
-        GroupTalk result = groupTalkService.findForUpdate(ticketKey);
+        when(ticketQueryAdapter.findForUpdate(any(TicketKey.class)))
+            .thenReturn(ticketRdo);
+        when(groupTalkMemberService.findAll(any(TicketKey.class)))
+            .thenReturn(memberList);
+        when(groupTalkPartnerService.findAll(any(TicketKey.class)))
+            .thenReturn(partnerList);
 
-        // Assertions
-        assertNotNull(result);
-        // Add more assertions as needed
+
+        GroupTalk actual = groupTalkService.findForUpdate(TicketKey.sample());
+
+        GroupTalk expected = new GroupTalk(GroupTalkUtil.newTalk(ticketRdo), memberList, partnerList, GroupTalkUtil.newGroupTalkOption(ticketRdo));
+
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void testRegister() {
-        // Create test data
-        TicketKey ticketKey = new TicketKey();
-        GroupTalkCdo groupTalkCdo = new GroupTalkCdo();
+    void register() {
+        groupTalkService.register(TicketKey.sample(), GroupTalkCdo.sample());
 
-        // Call the method
-        assertDoesNotThrow(() -> groupTalkService.register(ticketKey, groupTalkCdo));
-
-        // Add assertions for specific behavior after the method call
-    }
-
-    @Test
-    public void testModify() {
-        // Create test data
-        TicketKey ticketKey = new TicketKey();
-        GroupTalkUdo groupTalkUdo = new GroupTalkUdo();
-
-        // Call the method
-        assertDoesNotThrow(() -> groupTalkService.modify(ticketKey, groupTalkUdo));
-
-        // Add assertions for specific behavior after the method call
-    }
-
-    @Test
-    public void testRemove() {
-        // Create test data
-        TicketKey ticketKey = new TicketKey();
-
-        // Call the method
-        assertDoesNotThrow(() -> groupTalkService.remove(ticketKey));
-
-        // Add assertions for specific behavior after the method call
+        verify(ticketAdapter).register(any(TicketKey.class), any(TicketCdo.class));
+        verify(groupTalkMemberService).joinAll(any(TicketKey.class), any(MemberList.class));
+        verify(groupTalkPartnerService).inviteAll(any(TicketKey.class), any(PartnerList.class));
+        verify(groupTalkPartnerService).joinAll(any(TicketKey.class), any(PartnerList.class));
     }
 }
 ```
