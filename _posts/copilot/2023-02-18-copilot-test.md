@@ -1,108 +1,34 @@
 ```java
-@ExtendWith(MockitoExtension.class)
-public class GroupTalkServiceImplTest {
+    @DisplayName("findAll returns GroupTalkListItemList when TicketQueryAdapter returns non-empty TicketRdoListRdo")
+@Test
+void findAllReturnsGroupTalkListItemListWhenTicketQueryAdapterReturnsNonEmptyTicketRdoListRdo() {
+    TicketRdoListRdo ticketRdoListRdo = new TicketRdoListRdo();
+    ticketRdoListRdo.setList(Arrays.asList(new TicketRdo(), new TicketRdo()));
+    when(ticketQueryAdapter.findAll(any(), any(), any(), any())).thenReturn(ticketRdoListRdo);
 
-    @Mock
-    private TicketAdapter ticketAdapter;
+    GroupTalkListItemList result = groupTalkService.findAll(groupTalkQuery);
 
-    @Mock
-    private TicketQueryAdapter ticketQueryAdapter;
+    assertThat(result).isNotNull();
+    assertThat(result.getList()).isNotEmpty();
+}
 
-    @Mock
-    private TicketCustomMetadataAdapter ticketCustomMetadataAdapter;
+@DisplayName("findAll returns GroupTalkListItemList with empty list when TicketQueryAdapter returns empty TicketRdoListRdo")
+@Test
+void findAllReturnsGroupTalkListItemListWithEmptyListWhenTicketQueryAdapterReturnsEmptyTicketRdoListRdo() {
+    TicketRdoListRdo ticketRdoListRdo = new TicketRdoListRdo();
+    ticketRdoListRdo.setList(Collections.emptyList());
+    when(ticketQueryAdapter.findAll(any(), any(), any(), any())).thenReturn(ticketRdoListRdo);
 
-    @Mock
-    private GroupTalkMemberService groupTalkMemberService;
+    GroupTalkListItemList result = groupTalkService.findAll(groupTalkQuery);
 
-    @Mock
-    private GroupTalkPartnerService groupTalkPartnerService;
+    assertThat(result).isNotNull();
+    assertThat(result.getList()).isEmpty();
+}
 
-    @Mock
-    private TalkQueryAuthorizedFilterService talkQueryAuthorizedFilterService;
-
-    @Mock
-    private TalkCustomerQueryAuthorizedFilterService talkCustomerQueryAuthorizedFilterService;
-
-    @InjectMocks
-    private GroupTalkServiceImpl groupTalkService;
-
-    @Test
-    void findAll() {
-        TicketRdoListRdo ticketRdoListRdo = TicketRdoListRdo.sample();
-        when(ticketQueryAdapter.findAll(any(TenantKey.class), any(TicketQuery.class), any(Pageable.class), any(Order.class)))
-            .thenReturn(ticketRdoListRdo);
-
-        GroupTalkQuery groupTalkQuery = GroupTalkQuery.builder()
-            .tenantKey(TenantKey.sample())
-            .ticketQuery(TicketQuery.sample())
-            .pageable(Pageable.all())
-            .order(Order.CREATED)
-            .build();
-
-        GroupTalkListItemList actual = groupTalkService.findAll(groupTalkQuery);
-
-        GroupTalkListItemList expected = new GroupTalkListItemList(
-            ticketRdoListRdo.getList().stream()
-                .map(GroupTalkUtil::newTalk)
-                .map(GroupTalkListItem::new)
-                .collect(Collectors.toList()),
-            -1,
-            TicketRdoListRdo.sample().getTotal()
-        );
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void find() {
-        TicketRdo ticketRdo = TicketRdo.sample();
-        MemberList memberList = MemberList.sample();
-        PartnerList partnerList = PartnerList.sample();
-
-        when(ticketQueryAdapter.find(any(TicketKey.class)))
-            .thenReturn(ticketRdo);
-        when(groupTalkMemberService.findAll(any(TicketKey.class)))
-            .thenReturn(memberList);
-        when(groupTalkPartnerService.findAll(any(TicketKey.class)))
-            .thenReturn(partnerList);
-
-
-        GroupTalk actual = groupTalkService.find(TicketKey.sample());
-
-        GroupTalk expected = new GroupTalk(GroupTalkUtil.newTalk(ticketRdo), memberList, partnerList, GroupTalkUtil.newGroupTalkOption(ticketRdo));
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void findForUpdate() {
-        TicketRdo ticketRdo = TicketRdo.sample();
-        MemberList memberList = MemberList.sample();
-        PartnerList partnerList = PartnerList.sample();
-
-        when(ticketQueryAdapter.findForUpdate(any(TicketKey.class)))
-            .thenReturn(ticketRdo);
-        when(groupTalkMemberService.findAll(any(TicketKey.class)))
-            .thenReturn(memberList);
-        when(groupTalkPartnerService.findAll(any(TicketKey.class)))
-            .thenReturn(partnerList);
-
-
-        GroupTalk actual = groupTalkService.findForUpdate(TicketKey.sample());
-
-        GroupTalk expected = new GroupTalk(GroupTalkUtil.newTalk(ticketRdo), memberList, partnerList, GroupTalkUtil.newGroupTalkOption(ticketRdo));
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void register() {
-        groupTalkService.register(TicketKey.sample(), GroupTalkCdo.sample());
-
-        verify(ticketAdapter).register(any(TicketKey.class), any(TicketCdo.class));
-        verify(groupTalkMemberService).joinAll(any(TicketKey.class), any(MemberList.class));
-        verify(groupTalkPartnerService).inviteAll(any(TicketKey.class), any(PartnerList.class));
-        verify(groupTalkPartnerService).joinAll(any(TicketKey.class), any(PartnerList.class));
-    }
+@DisplayName("findAll throws IllegalArgumentException when GroupTalkQuery has invalid ReadAuthorityType")
+@Test
+void findAllThrowsIllegalArgumentExceptionWhenGroupTalkQueryHasInvalidReadAuthorityType() {
+    groupTalkQuery.setReadAuthorityType(ReadAuthorityType.UNKNOWN);
+    assertThrows(IllegalArgumentException.class, () -> groupTalkService.findAll(groupTalkQuery));
 }
 ```
