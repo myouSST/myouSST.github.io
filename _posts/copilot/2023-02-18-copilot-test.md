@@ -1,31 +1,28 @@
 ```java
 @Test
-void testFindAll() {
-    // Arrange
-    GroupTalkQuery query = new GroupTalkQuery();
-    query.setTenantKey("test_tenant");
-    query.setPageable(new PageRequest(0, 10));
-    query.setOrder("desc");
+void findAll() {
+    TicketRdoListRdo ticketRdoListRdo = TicketRdoListRdo.sample();
+    when(ticketQueryAdapter.findAll(any(TenantKey.class), any(TicketQuery.class), any(Pageable.class), any(Order.class)))
+        .thenReturn(ticketRdoListRdo);
 
-    AuthorizedUserScopeQuery scopeQuery = new AuthorizedUserScopeQuery();
-    TicketRdoListRdo ticketRdoListRdo = new TicketRdoListRdo();
-    ticketRdoListRdo.setList(new ArrayList<>());
-    ticketRdoListRdo.setNext(false);
-    ticketRdoListRdo.setTotal(0);
+    GroupTalkQuery groupTalkQuery = GroupTalkQuery.builder()
+        .tenantKey(TenantKey.sample())
+        .ticketQuery(TicketQuery.sample())
+        .pageable(Pageable.all())
+        .order(Order.CREATED)
+        .build();
 
-    when(groupTalkService.getUserScopeQuery(any(GroupTalkQuery.class))).thenReturn(scopeQuery);
-    when(ticketQueryAdapter.findAll(anyString(), any(), any(), any())).thenReturn(ticketRdoListRdo);
+    GroupTalkListItemList actual = groupTalkService.findAll(groupTalkQuery);
 
-    // Act
-    GroupTalkListItemList result = groupTalkService.findAll(query);
+    GroupTalkListItemList expected = new GroupTalkListItemList(
+        ticketRdoListRdo.getList().stream()
+            .map(GroupTalkUtil::newTalk)
+            .map(GroupTalkListItem::new)
+            .collect(Collectors.toList()),
+        -1,
+        TicketRdoListRdo.sample().getTotal()
+    );
 
-    // Assert
-    assertEquals(0, result.getList().size());
-    assertEquals(false, result.getNext());
-    assertEquals(0, result.getTotal());
-
-    verify(groupTalkService, times(1)).getUserScopeQuery(any(GroupTalkQuery.class));
-    verify(ticketQueryAdapter, times(1)).findAll(eq("test_tenant"), any(), any(), eq("desc"));
-    verifyNoMoreInteractions(groupTalkService, ticketQueryAdapter);
+    assertEquals(expected, actual);
 }
 ```
