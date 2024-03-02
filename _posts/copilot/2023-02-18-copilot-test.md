@@ -1,19 +1,31 @@
 ```java
-    @Test
-    void findAllTest(){
-        // Arrange
-        GroupTalkQuery query = new GroupTalkQuery();
-        GroupTalkListItemList mockGroupTalkListItemList = new GroupTalkListItemList();
+@Test
+void testFindAll() {
+    // Arrange
+    GroupTalkQuery query = new GroupTalkQuery();
+    query.setTenantKey("test_tenant");
+    query.setPageable(new PageRequest(0, 10));
+    query.setOrder("desc");
 
-        Mockito.when(ticketRdoListRdoMock.getList()).thenReturn(new ArrayList<>());
-        Mockito.when(groupTalkServiceImpl.findAll(query)).thenReturn(mockGroupTalkListItemList);
+    AuthorizedUserScopeQuery scopeQuery = new AuthorizedUserScopeQuery();
+    TicketRdoListRdo ticketRdoListRdo = new TicketRdoListRdo();
+    ticketRdoListRdo.setList(new ArrayList<>());
+    ticketRdoListRdo.setNext(false);
+    ticketRdoListRdo.setTotal(0);
 
-        // Act
-        GroupTalkListItemList result = groupTalkServiceImpl.findAll(query);
+    when(groupTalkService.getUserScopeQuery(any(GroupTalkQuery.class))).thenReturn(scopeQuery);
+    when(ticketQueryAdapter.findAll(anyString(), any(), any(), any())).thenReturn(ticketRdoListRdo);
 
-        // Assert
-        Mockito.verify(ticketRdoListRdoMock, Mockito.times(1)).getList();
-        assert(result != null);
-        assert(result.equals(mockGroupTalkListItemList));
-    }
+    // Act
+    GroupTalkListItemList result = groupTalkService.findAll(query);
+
+    // Assert
+    assertEquals(0, result.getList().size());
+    assertEquals(false, result.getNext());
+    assertEquals(0, result.getTotal());
+
+    verify(groupTalkService, times(1)).getUserScopeQuery(any(GroupTalkQuery.class));
+    verify(ticketQueryAdapter, times(1)).findAll(eq("test_tenant"), any(), any(), eq("desc"));
+    verifyNoMoreInteractions(groupTalkService, ticketQueryAdapter);
+}
 ```
